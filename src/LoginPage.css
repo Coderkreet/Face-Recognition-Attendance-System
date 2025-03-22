@@ -1,0 +1,172 @@
+.form-control,
+.form-check-label,
+.form-label {
+  font-size: 1rem; /* Equivalent to 16px */
+  font-family: Arial, sans-serif;
+}
+/* LoginPage.css */
+body{
+  /* background-image: url('assete/bg-image.webp');  */
+}
+
+
+/* body {
+    
+    background: linear-gradient(to right, blue 50%, white 50%);
+    justify-content: center;
+  }
+
+  @media (max-width: 390) {
+    body {
+      background-color: blue;
+    }
+  } */
+  
+  /* .box {
+    width: 800px;
+    height: 550px;
+    margin-top: 100px;
+    background: linear-gradient(to right, rgb(245, 245, 246) 50%, rgb(153, 160, 237) 50%);
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  form{
+    display: flex;
+    flex-direction: column;
+}
+
+form h2{
+    font-size: 3rem;
+    margin-left: 150px;
+    margin-top: 30px;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+.input-container{
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    
+}
+
+.input-container label{
+    margin-bottom: 20px;
+    font-size: 18px;
+    
+
+}
+.input-container input{
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    width: 30%;
+    margin-left: 10px;
+
+}
+button{
+    background-color:blue ;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 30%;
+    justify-content: center;
+    text-align: center;
+    border-radius: 5px;
+    margin-left: 60px;
+}
+ button:hover{
+    background-color: rgb(182, 182, 219);
+} */
+
+.login-container {
+  min-height: 100vh;
+}
+
+.carousel-custom {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  border-radius: 15px;
+}
+
+.carousel-image {
+  filter: brightness(0.8);
+}
+
+.carousel-caption-custom {
+  background: rgba(0,0,0,0.5);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.login-card {
+  transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+}
+
+.form-control::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+.form-control:focus {
+  background-color: rgba(255,255,255,0.1);
+  border-color: #ff5e00;
+  box-shadow: none;
+  color: white;
+}
+
+.input-group-text {
+  border-color: rgba(255,255,255,0.2);
+}
+
+.form-check-input:checked {
+  background-color: #ff5e00;
+  border-color: #ff5e00;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255,94,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.background--custom {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  overflow: hidden;
+  z-index: -2;
+  top: 0;
+  left: 0;
+}
+
+/* Make sure content appears above the background */
+.login-container {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* Optional: Add some transparency to the login card */
+.login-card {
+  background-color: rgba(255, 255, 255, 0.7) ;
+  backdrop-filter: blur(30px);
+}
+
+.webcam-container {
+  background-color: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.webcam-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
