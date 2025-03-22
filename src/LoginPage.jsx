@@ -9,6 +9,7 @@ import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 import Loinimg from './assete/—Pngtree—intelligent technology_5626635.png'
+import { Modal } from 'react-bootstrap';
 
 const Loginpage = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const Loginpage = () => {
   const formDataRef = useRef(formData);
   const [isVerifying, setIsVerifying] = useState(false);
   const [faceEmbedding, setFaceEmbedding] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const videoConstraints = {
     width: 720,
@@ -221,13 +224,19 @@ const Loginpage = () => {
     }
   };
 
-  // Update the handleSubmit function
+  // Add this function to handle showing alerts
+  const showAlert = (message) => {
+    setModalMessage(message);
+    setShowModal(true);
+  };
+
+  // Update the handleSubmit function - showing only the alert replacements
   const handleSubmit = async (event) => {
     event.preventDefault();
     
     if (formData.useWebcam) {
       if (!formData.username.trim()) {
-        window.alert('Please enter a username before proceeding with face recognition.');
+        showAlert('Please enter a username before proceeding with face recognition.');
         return;
       }
 
@@ -235,14 +244,14 @@ const Loginpage = () => {
       try {
         const hasFace = await checkForFace();
         if (!hasFace) {
-          window.alert('No face detected. Please position your face in front of the camera.');
+          showAlert('No face detected. Please position your face in front of the camera.');
           setIsVerifying(false);
           return;
         }
 
         const storedUserData = localStorage.getItem('userData');
         if (!storedUserData) {
-          window.alert('No registered user found. Please register first.');
+          showAlert('No registered user found. Please register first.');
           setIsVerifying(false);
           return;
         }
@@ -250,7 +259,7 @@ const Loginpage = () => {
         const userData = JSON.parse(storedUserData);
         
         if (formData.username !== userData.username) {
-          window.alert('Username not found. Please check your username.');
+          showAlert('Username not found. Please check your username.');
           setIsVerifying(false);
           return;
         }
@@ -273,7 +282,7 @@ const Loginpage = () => {
 
           // Use the same threshold as dashboard (0.3)
           if (matchScore > 0.35) {
-            localStorage.setItem('user', JSON.stringify({
+            sessionStorage.setItem('user', JSON.stringify({
               username: formData.username,
               isLoggedIn: true,
               faceData: currentFaceData,
@@ -281,19 +290,19 @@ const Loginpage = () => {
             }));
             navigate('/dashboard');
           } else {
-            window.alert('Face verification failed. Please try again.');
+            showAlert('Face verification failed. Please try again.');
           }
         } else {
-          window.alert('Could not process face. Please try again.');
+          showAlert('Could not process face. Please try again.');
         }
       } catch (error) {
         console.error('Error during face recognition login:', error);
-        window.alert('An error occurred during face recognition. Please try again.');
+        showAlert('An error occurred during face recognition. Please try again.');
       } finally {
         setIsVerifying(false);
       }
     } else {
-      window.alert('Please enable face recognition to login.');
+      showAlert('Please enable face recognition to login.');
       return;
     }
   };
@@ -441,18 +450,22 @@ const Loginpage = () => {
 background: linear-gradient(135deg, rgb(30, 30, 47) 0%, rgb(30, 30, 36) 100%);        }
 
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(50px); /* Start slightly below */
-          }
-          to {
+          0% {
             opacity: 1;
-            transform: translateY(0); /* End at original position */
+            transform: translateY(20px);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(20px);
           }
         }
 
         .animated-image {
-          animation: fadeIn 2s ease-in-out infinite;
+          animation: fadeIn 3s ease-in-out infinite;
         }
 
         .face-recognition-btn {
@@ -476,6 +489,23 @@ background: linear-gradient(135deg, rgb(30, 30, 47) 0%, rgb(30, 30, 36) 100%);  
           background-color: #cc4b00;
         }
       `}</style>
+      
+      {/* Add this Modal component before the closing tag */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton style={{ backgroundColor: '#ff5e00', color: 'white' }}>
+          <Modal.Title>Alert</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{modalMessage}</Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn"
+            style={{ backgroundColor: '#ff5e00', color: 'white' }}
+            onClick={() => setShowModal(false)}
+          >
+            Close
+          </button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

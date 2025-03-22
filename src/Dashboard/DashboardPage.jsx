@@ -10,7 +10,7 @@ import DashbordImg from '../assete/Dashbord Img.png'
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(sessionStorage.getItem('user'));
   const userData = JSON.parse(localStorage.getItem('userData'));
 
   const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -152,7 +152,7 @@ const DashboardPage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     navigate('/login');
   };
 
@@ -181,7 +181,7 @@ const DashboardPage = () => {
         return;
       }
 
-      const userData = JSON.parse(localStorage.getItem('user'));
+      const userData = JSON.parse(sessionStorage.getItem('user'));
       if (!userData?.faceData || !userData?.faceImage) {
         showPopupNotification('No registered face data found. Please log in with face recognition first.', 'error');
         return;
@@ -580,7 +580,7 @@ const DashboardPage = () => {
                             className="col text-center" 
                             style={{
                               padding: '8px 0',
-                              borderRadius: '5px',
+                              borderRadius: '100%',
                               background: dayInfo.isToday 
                                 ? 'rgba(255, 255, 0, 0.2)' 
                                 : dayInfo.isPresent 

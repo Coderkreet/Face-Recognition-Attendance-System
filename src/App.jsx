@@ -7,7 +7,7 @@ import DashboardPage from './Dashboard/DashboardPage';
 import RegisterPage from './RegisterPage';
 // Add Protected Route component
 const ProtectedRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(sessionStorage.getItem('user'));
   
   if (!user || !user.isLoggedIn) {
     // Redirect to login if not authenticated
