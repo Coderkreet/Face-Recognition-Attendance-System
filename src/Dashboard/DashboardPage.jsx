@@ -11,6 +11,7 @@ import DashbordImg from '../assete/Dashbord Img.png'
 const DashboardPage = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+  const userData = JSON.parse(localStorage.getItem('userData'));
 
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [showWebcam, setShowWebcam] = useState(false);
@@ -405,23 +406,57 @@ const DashboardPage = () => {
         }}>
           <div className="card-body p-4">
             <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-0" style={{ 
-                  background: 'linear-gradient(45deg, #00ff87, #60efff)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 'bold'
-                }}>
-                  Welcome back, {user?.username}
-                </h2>
-                <p className="text-muted mb-0">
-                  {currentDate.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
+              <div className="d-flex align-items-center">
+                <div className="me-3">
+                  {userData?.profilePicture ? (
+                    <img
+                      src={userData.profilePicture}
+                      alt="Profile"
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid #00ff87'
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(45deg, #00ff87, #60efff)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        color: '#1e1e2f',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h2 className="mb-0" style={{ 
+                    background: 'linear-gradient(45deg, #00ff87, #60efff)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontWeight: 'bold'
+                  }}>
+                    Welcome back, {user?.username}
+                  </h2>
+                  <p className="text-light mb-0">
+                    {currentDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
               </div>
               <Button 
                 onClick={handleLogout}
