@@ -5,6 +5,8 @@ import ForgetPasswordPage from './ForgotPs';
 import Loginpage from './LoginPage';
 import DashboardPage from './Dashboard/DashboardPage';
 import RegisterPage from './RegisterPage';
+import ProfilePage from './ProfilePage';
+
 // Add Protected Route component
 const ProtectedRoute = ({ children }) => {
   const user = JSON.parse(sessionStorage.getItem('user'));
@@ -26,6 +28,11 @@ function App() {
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile/:username" element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         } />
         <Route path="/forgot-password" element={<ForgetPasswordPage />} />

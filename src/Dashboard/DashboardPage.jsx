@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
@@ -10,8 +10,8 @@ import DashbordImg from '../assete/Dashbord Img.png'
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(sessionStorage.getItem('user'));
-  const userData = JSON.parse(localStorage.getItem('userData'));
+  const [user] = useState(() => JSON.parse(sessionStorage.getItem('user')));
+  const [userData] = useState(() => JSON.parse(localStorage.getItem('userData')));
 
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [showWebcam, setShowWebcam] = useState(false);
@@ -30,6 +30,7 @@ const DashboardPage = () => {
     // Check if user is logged in
     if (!user || !user.isLoggedIn) {
       navigate('/login');
+      return; // Early return if no user
     }
 
     // Load BlazeFace model
@@ -56,7 +57,7 @@ const DashboardPage = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Load attendance records from localStorage on component mount
+    // Load attendance records only once on mount
     const storedRecords = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
     setAttendanceRecords(storedRecords);
 
@@ -73,15 +74,18 @@ const DashboardPage = () => {
       window.removeEventListener('offline', handleOffline);
       clearInterval(timer);
     };
-  }, [navigate]);
+  }, [navigate, user]); // Minimal dependencies
 
   useEffect(() => {
-    // Generate calendar days for current month
+    if (!user) return; // Guard clause
     generateCalendarDays(currentDate);
-  }, [currentDate, attendanceRecords]);
+  }, [currentDate, user]); // Remove attendanceRecords from dependencies
 
-  const generateCalendarDays = (date) => {
-    if (!user) return; // Make sure user is defined
+  const generateCalendarDays = useCallback((date) => {
+    if (!user) return;
+    
+    // Get current attendance records from state instead of parsing localStorage
+    const existingRecords = attendanceRecords;
     
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -110,7 +114,7 @@ const DashboardPage = () => {
       const dateString = dayDate.toLocaleDateString();
       
       // Check if attendance was marked on this day
-      const isPresent = attendanceRecords.some(record => 
+      const isPresent = existingRecords.some(record => 
         new Date(record.timestamp).toLocaleDateString() === dateString && 
         record.username === user.username
       );
@@ -136,7 +140,7 @@ const DashboardPage = () => {
     }
     
     setCalendarDays(days);
-  };
+  }, [user, attendanceRecords]);
 
   // Add these two functions for month navigation
   const prevMonth = () => {
@@ -392,25 +396,28 @@ const DashboardPage = () => {
     }
   };
 
+ 
+
   return (
-    <div className="dashboard-container min-vh-100 py-4" style={{
+    <div className="dashboard-container  py-1" style={{
       background: 'linear-gradient(135deg, #1e1e2f 0%, #1e1e24 100%)',
       color: 'white'
     }}>
-      <div className="container">
+      <div className="container p-1">
         {/* Header Section */}
         <div className="card mb-4 border-0" style={{
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           borderRadius: '15px'
         }}>
-          <div className="card-body p-4">
+          <div className="card-body p-1">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center">
                 <div className="me-3">
-                  {userData?.profilePicture ? (
+                  {userData && userData.length > 0 && 
+                   userData.find(u => u.username === user?.username)?.profilePicture ? (
                     <img
-                      src={userData.profilePicture}
+                      src={userData.find(u => u.username === user?.username).profilePicture}
                       alt="Profile"
                       style={{
                         width: '60px',
@@ -631,7 +638,7 @@ const DashboardPage = () => {
                   Recent Attendance Records
                 </h4>
                 <div className="table-responsive">
-                  <Table hover className="table-dark table-borderless">
+                <Table hover className="table-dark table-borderless">
                     <thead>
                       <tr style={{
                         background: 'rgba(255, 255, 255, 0.05)'
@@ -645,7 +652,7 @@ const DashboardPage = () => {
                       {attendanceRecords.map(record => (
                         <tr key={record.id}>
                           <td>{record.timestamp}</td>
-                          <td>{record.username}</td>
+                          <td>    <Link to={`/profile/${record.username}`}>    {record.username}</Link></td>
                           <td>
                             <span className="badge" style={{
                               background: record.status === 'Present' 
