@@ -31,15 +31,7 @@ const Loginpage = () => {
     facingMode: "user"
   };
 
-  const capture = React.useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    // Here you would typically:
-    // 1. Send this image to your backend
-    // 2. Process it for face recognition
-    console.log("Captured image:", imageSrc);
-    // Temporary alert for demo
-    window.alert('Face capture successful!');
-  }, [webcamRef]);
+
 
   // Replace the face-api.js model loading with BlazeFace
   React.useEffect(() => {
@@ -137,6 +129,98 @@ const Loginpage = () => {
     };
   };
 
+  // Update the compareFaceEmbeddings function
+  const compareFaceEmbeddings = (currentFaceData, storedFaceData) => {
+    if (!currentFaceData || !storedFaceData) return 0;
+    
+    try {
+      // Get the probabilities
+      const currentProb = currentFaceData.probability;
+      const storedProb = storedFaceData.probability;
+      const probDiff = Math.abs(currentProb - storedProb);
+
+      console.log('Probability comparison:', {
+        current: currentProb.toFixed(3),
+        stored: storedProb.toFixed(3),
+        difference: probDiff.toFixed(3)
+      });
+
+      // If difference is very small (0.01 or less)
+      if (probDiff <= 0.01) {
+        return 0.95 + (0.01 - probDiff); // Will give 0.94-0.95 range for 0.01 diff
+      }
+
+      // If probabilities are too different
+      if (probDiff > 0.1) {
+        return 0; // Not a match
+      }
+
+      // For other cases, calculate a weighted score
+      const similarityScore = 1 - (probDiff / 0.1); // Will give 0-1 range
+      return Math.max(0.85, similarityScore); // Minimum 0.85 if passed other checks
+    } catch (error) {
+      console.error('Error comparing probabilities:', error);
+      return 0;
+    }
+  };
+
+  // Add the compareFaces function
+  const compareFaces = async (currentImage, storedImage, currentFaceData, storedFaceData) => {
+    try {
+      // Compare facial features and landmarks
+      const featureScore = compareFaceEmbeddings(currentFaceData, storedFaceData);
+      
+      // Load and compare the actual images
+      const img1 = new Image();
+      const img2 = new Image();
+      
+      await Promise.all([
+        new Promise(resolve => {
+          img1.onload = resolve;
+          img1.src = currentImage;
+        }),
+        new Promise(resolve => {
+          img2.onload = resolve;
+          img2.src = storedImage;
+        })
+      ]);
+
+      // Create canvases for image comparison
+      const canvas1 = document.createElement('canvas');
+      const canvas2 = document.createElement('canvas');
+      const ctx1 = canvas1.getContext('2d');
+      const ctx2 = canvas2.getContext('2d');
+
+      // Draw images with same dimensions
+      canvas1.width = canvas2.width = 100;
+      canvas1.height = canvas2.height = 100;
+      ctx1.drawImage(img1, 0, 0, 100, 100);
+      ctx2.drawImage(img2, 0, 0, 100, 100);
+
+      // Compare pixel data
+      const imageData1 = ctx1.getImageData(0, 0, 100, 100).data;
+      const imageData2 = ctx2.getImageData(0, 0, 100, 100).data;
+      
+      let pixelMatchCount = 0;
+      for (let i = 0; i < imageData1.length; i += 4) {
+        const diff = Math.abs(imageData1[i] - imageData2[i]) +
+                    Math.abs(imageData1[i + 1] - imageData2[i + 1]) +
+                    Math.abs(imageData1[i + 2] - imageData2[i + 2]);
+        if (diff < 128) { // Threshold for pixel similarity
+          pixelMatchCount++;
+        }
+      }
+
+      const imageScore = pixelMatchCount / (imageData1.length / 4);
+
+      // Combine scores (50% feature weight, 50% image weight)
+      return (featureScore * 0.5) + (imageScore * 0.5);
+    } catch (error) {
+      console.error('Error comparing faces:', error);
+      return 0;
+    }
+  };
+
   // Update the handleSubmit function
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -156,24 +240,48 @@ const Loginpage = () => {
           return;
         }
 
-        // Capture the webcam image
-        const imageSrc = webcamRef.current.getScreenshot();
+        const storedUserData = localStorage.getItem('userData');
+        if (!storedUserData) {
+          window.alert('No registered user found. Please register first.');
+          setIsVerifying(false);
+          return;
+        }
 
-        // Get face embedding
+        const userData = JSON.parse(storedUserData);
+        
+        if (formData.username !== userData.username) {
+          window.alert('Username not found. Please check your username.');
+          setIsVerifying(false);
+          return;
+        }
+
         const predictions = await model.estimateFaces(webcamRef.current.video, false);
         if (predictions.length > 0) {
           const prediction = predictions[0];
-          const faceData = normalizeEmbedding(prediction);
+          const currentFaceData = normalizeEmbedding(prediction);
+          const currentImage = webcamRef.current.getScreenshot();
+          
+          // Compare faces using the new method
+          const matchScore = await compareFaces(
+            currentImage,
+            userData.faceImage,
+            currentFaceData,
+            userData.faceData
+          );
 
-          // Store both face data and image
-          if (formData.username) {
+          console.log('Face match score:', matchScore);
+
+          // Use the same threshold as dashboard (0.3)
+          if (matchScore > 0.35) {
             localStorage.setItem('user', JSON.stringify({
               username: formData.username,
               isLoggedIn: true,
-              faceData: faceData,
-              faceImage: imageSrc // Store the face image
+              faceData: currentFaceData,
+              faceImage: currentImage
             }));
             navigate('/dashboard');
+          } else {
+            window.alert('Face verification failed. Please try again.');
           }
         } else {
           window.alert('Could not process face. Please try again.');
@@ -185,7 +293,6 @@ const Loginpage = () => {
         setIsVerifying(false);
       }
     } else {
-      // Remove the regular login flow since we only want face recognition login
       window.alert('Please enable face recognition to login.');
       return;
     }
@@ -320,7 +427,7 @@ const Loginpage = () => {
                 <p className="text-center mt-3 text-light">
                   New user?{' '}
                   <Link to="/register" className="text-primary">
-                    Register with Aadhaar
+                    Register with Face
                   </Link>
                 </p>
               </div>
