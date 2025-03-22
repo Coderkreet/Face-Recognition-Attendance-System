@@ -12,7 +12,6 @@ import loginimg from './assete/—Pngtree—intelligent technology_5626635.png';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [showAadhaarLogin, setShowAadhaarLogin] = useState(false);
   const [aadhaarLoginData, setAadhaarLoginData] = useState({
     aadhaarNumber: '',
     otp: ''
@@ -35,7 +34,6 @@ const RegisterPage = () => {
   const webcamRef = useRef(null);
   const [faceDetected, setFaceDetected] = useState(false);
   const [model, setModel] = useState(null);
-  const [isVerifying, setIsVerifying] = useState(false);
 
   const videoConstraints = {
     width: 720,
@@ -194,7 +192,22 @@ const RegisterPage = () => {
       return;
     }
 
-    localStorage.setItem('userData', JSON.stringify({
+    // Get existing userData array from localStorage or initialize empty array
+    let userData = JSON.parse(localStorage.getItem('userData')) || [];
+
+    // Check if user already exists
+    const userExists = userData.some(user => 
+      user.aadhaarNumber === formData.aadhaarNumber || 
+      user.email === formData.email
+    );
+
+    if (userExists) {
+      alert("User with this Aadhaar number or email already exists!");
+      return;
+    }
+
+    // Add new user to array
+    userData.push({
       username: formData.username,
       fullName: formData.fullName,
       email: formData.email,
@@ -203,8 +216,12 @@ const RegisterPage = () => {
       faceData: formData.faceData,
       faceImage: formData.faceImage,
       profilePicture: formData.profilePicture
-    }));
+    });
 
+    // Save updated array back to localStorage
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+    alert("Registration successful!");
     navigate('/dashboard');
   };
 

@@ -249,16 +249,16 @@ const Loginpage = () => {
           return;
         }
 
-        const storedUserData = localStorage.getItem('userData');
-        if (!storedUserData) {
-          showAlert('No registered user found. Please register first.');
+        const storedUsersData = JSON.parse(localStorage.getItem('userData') || '[]');
+        if (!storedUsersData.length) {
+          showAlert('No registered users found. Please register first.');
           setIsVerifying(false);
           return;
         }
 
-        const userData = JSON.parse(storedUserData);
-        
-        if (formData.username !== userData.username) {
+        // Find the user with matching username
+        const userData = storedUsersData.find(user => user.username === formData.username);
+        if (!userData) {
           showAlert('Username not found. Please check your username.');
           setIsVerifying(false);
           return;
@@ -280,7 +280,6 @@ const Loginpage = () => {
 
           console.log('Face match score:', matchScore);
 
-          // Use the same threshold as dashboard (0.3)
           if (matchScore > 0.35) {
             sessionStorage.setItem('user', JSON.stringify({
               username: formData.username,
