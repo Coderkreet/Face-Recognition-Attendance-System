@@ -29,8 +29,8 @@ const Loginpage = () => {
   const [modalMessage, setModalMessage] = useState('');
 
   const videoConstraints = {
-    width: 720,
-    height: 400,
+    width: 1400,
+    height: 1000,
     facingMode: "user"
   };
 
