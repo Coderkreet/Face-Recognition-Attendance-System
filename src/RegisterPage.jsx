@@ -225,6 +225,7 @@ const RegisterPage = () => {
                   <Webcam
                     ref={webcamRef}
                     audio={false}
+                    mirrored={true}
                     screenshotFormat="image/jpeg"
                     videoConstraints={videoConstraints}
                     className="w-100"

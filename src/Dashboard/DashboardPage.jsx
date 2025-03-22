@@ -690,7 +690,7 @@ const DashboardPage = () => {
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
                   className="w-100"
-                  mirrored={false}
+                  mirrored={true}
                   videoConstraints={{
                     width: 720,
                     height: 480,
