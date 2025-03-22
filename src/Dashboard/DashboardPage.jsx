@@ -221,7 +221,7 @@ const DashboardPage = () => {
       }
 
       // Verify face match and mark attendance (using 40% threshold)
-      if (matchScore > 0.4) {
+      if (matchScore > 0.3) {
         const newRecord = {
           id: Date.now(),
           username: user.username,
