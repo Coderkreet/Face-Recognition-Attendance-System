@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaUser, FaIdCard, FaPhone, FaCamera } from 'react-icons/fa';
 import './LoginPage.css'; // We can reuse the login page styles
 import 'bootstrap/dist/css/bootstrap.min.css';
-import GradientBackground from './GradientBackground';
+import GradientBackground from '../components/GradientBackground';
 import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 
-import loginimg from './assete/—Pngtree—intelligent technology_5626635.png';
+import loginimg from '../assete/—Pngtree—intelligent technology_5626635.png';
 
 const RegisterPage = () => {
   const navigate = useNavigate();

@@ -1,183 +1,290 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Badge } from 'react-bootstrap';
+import { 
+  FaCalendarAlt, 
+  FaChevronLeft, 
+  FaChevronRight,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHome,
+  FaClock
+} from 'react-icons/fa';
 
 const AttendanceCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
-  const user = JSON.parse(sessionStorage.getItem('user')); // Get user directly
+  const [monthStats, setMonthStats] = useState({
+    workingDays: 0,
+    presentDays: 0,
+    absentDays: 0,
+    holidays: 0
+  });
+
+  const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   useEffect(() => {
-    if (!user) return;
     generateCalendarDays(currentDate);
-  }, [currentDate, user]);
+  }, [currentDate]);
 
-  const generateCalendarDays = useCallback((date) => {
-    if (!user) return;
-    
-    // Get attendance records directly
-    const existingRecords = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
-    
+  const generateCalendarDays = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
-    
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
-    const daysFromPrevMonth = firstDay.getDay();
     const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
     
     const days = [];
-    const today = new Date();
-    
-    // Add empty slots for previous month days
-    for (let i = 0; i < daysFromPrevMonth; i++) {
-      days.push({ day: null, isCurrentMonth: false, isToday: false, isPresent: false });
-    }
-    
-    // Add current month days
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dayDate = new Date(year, month, i);
-      const dateString = dayDate.toLocaleDateString();
-      
-      const isPresent = existingRecords.some(record => 
-        new Date(record.timestamp).toLocaleDateString() === dateString && 
-        record.username === user.username
-      );
+    let workingDays = 0;
+    let presentDays = 0;
+    let holidays = 0;
 
-      const isPastDate = dayDate < today && dayDate.toDateString() !== today.toDateString();
-      
-      days.push({
-        day: i,
-        isCurrentMonth: true,
-        isToday: dateString === today.toLocaleDateString(),
-        isPresent: isPresent,
-        isAbsent: isPastDate && !isPresent
+    // Get attendance records
+    const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDay; i++) {
+      days.push({ 
+        day: null, 
+        isCurrentMonth: false 
       });
     }
-    
-    // Fill remaining slots
-    const totalSlots = 42;
-    const remainingSlots = totalSlots - days.length;
-    
-    for (let i = 1; i <= remainingSlots; i++) {
-      days.push({ day: i, isCurrentMonth: false, isToday: false, isPresent: false });
-    }
-    
-    setCalendarDays(days);
-  }, [user]);
 
-  const prevMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCurrentDate(newDate);
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDay = new Date(year, month, day);
+      const dayOfWeek = currentDay.getDay();
+      const dateString = currentDay.toLocaleDateString();
+      
+      const isSunday = dayOfWeek === 0;
+      const isToday = currentDay.toDateString() === new Date().toDateString();
+      
+      // Check attendance for this day
+      const dayRecord = records.find(record => 
+        new Date(record.timestamp).toLocaleDateString() === dateString
+      );
+
+      if (!isSunday) workingDays++;
+      if (dayRecord) presentDays++;
+      if (isSunday) holidays++;
+
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isSunday,
+        isToday,
+        attendance: dayRecord?.status || null,
+        timestamp: dayRecord?.timestamp || null
+      });
+    }
+
+    setCalendarDays(days);
+    setMonthStats({
+      workingDays,
+      presentDays,
+      absentDays: workingDays - presentDays,
+      holidays
+    });
   };
-  
-  const nextMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCurrentDate(newDate);
+
+  const getStatusColor = (status) => {
+    if (!status) return 'transparent';
+    switch (status.toLowerCase()) {
+      case 'present':
+      case 'work from office':
+        return 'rgba(25, 135, 84, 0.1)';
+      case 'work from home':
+        return 'rgba(13, 110, 253, 0.1)';
+      case 'late arrival':
+        return 'rgba(255, 193, 7, 0.1)';
+      case 'absent':
+        return 'rgba(220, 53, 69, 0.1)';
+      default:
+        return 'transparent';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    if (!status) return null;
+    switch (status.toLowerCase()) {
+      case 'present':
+      case 'work from office':
+        return <FaCheckCircle className="text-success" />;
+      case 'work from home':
+        return <FaHome className="text-primary" />;
+      case 'late arrival':
+        return <FaClock className="text-warning" />;
+      case 'absent':
+        return <FaTimesCircle className="text-danger" />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="card h-100 border-0" style={{
+    <Card className="border-0" style={{
       background: 'rgba(255, 255, 255, 0.05)',
       backdropFilter: 'blur(10px)',
       borderRadius: '15px'
     }}>
-      <div className="card-body p-4">
+      <Card.Body className="p-4">
+        {/* Calendar Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <Button 
-            variant="link" 
-            onClick={prevMonth}
-            className="text-decoration-none"
-            style={{ color: '#00ff87' }}
-          >
-            <i className="fas fa-chevron-left"></i>
-          </Button>
-          <h4 style={{ 
-            color: '#00ff87',
-            margin: 0,
-            fontWeight: 'bold'
-          }}>
-            {currentDate.toLocaleDateString('en-US', { 
-              month: 'long', 
-              year: 'numeric' 
-            })}
-          </h4>
-          <Button 
-            variant="link" 
-            onClick={nextMonth}
-            className="text-decoration-none"
-            style={{ color: '#00ff87' }}
-          >
-            <i className="fas fa-chevron-right"></i>
-          </Button>
+          <div className="d-flex align-items-center">
+            <FaCalendarAlt style={{color: '#00ff87'}} className=" me-2" size={24} />
+            <h4 style={{color: '#00ff87'}} className="mb-0">
+              {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </h4>
+          </div>
+          <div className="d-flex gap-2">
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() - 1);
+                setCurrentDate(newDate);
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              <FaChevronLeft />
+            </button>
+            <button
+              className="btn btn-sm"
+              onClick={() => setCurrentDate(new Date())}
+              style={{
+                background: 'rgba(13, 110, 253, 0.1)',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              Today
+            </button>
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() + 1);
+                setCurrentDate(newDate);
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              <FaChevronRight />
+            </button>
+          </div>
         </div>
 
-        <div className="calendar-grid">
-          <div className="row text-center mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-              <div key={index} className="col" style={{ color: '#ff3333' }}>
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {calendarDays.length > 0 && Array(6).fill().map((_, rowIndex) => (
-            <div key={rowIndex} className="row mb-2">
-              {Array(7).fill().map((_, colIndex) => {
-                const dayIndex = rowIndex * 7 + colIndex;
-                const dayInfo = calendarDays[dayIndex] || { 
-                  day: null, 
-                  isCurrentMonth: false, 
-                  isToday: false, 
-                  isPresent: false 
-                };
-                
-                return (
-                  <div 
-                    key={colIndex} 
-                    className="col text-center" 
-                    style={{
-                      padding: '8px 0',
-                      borderRadius: '100%',
-                      background: dayInfo.isToday 
-                        ? 'rgba(255, 255, 0, 0.2)' 
-                        : dayInfo.isPresent 
-                          ? 'rgba(0, 255, 0, 0.2)'
-                          : dayInfo.isAbsent
-                            ? 'rgba(255, 0, 0, 0.2)'
-                            : 'transparent',
-                      color: !dayInfo.isCurrentMonth 
-                        ? '#666666' 
-                        : dayInfo.isPresent 
-                          ? '#00ff00'
-                          : dayInfo.isAbsent
-                            ? '#ff0000'
-                            : '#ffffff',
-                      fontWeight: dayInfo.isToday ? 'bold' : 'normal',
-                      border: dayInfo.isToday ? '1px solid yellow' : 'none'
-                    }}
-                  >
-                    {dayInfo.day}
-                    {(dayInfo.isPresent || dayInfo.isAbsent) && (
-                      <div style={{ 
-                        fontSize: '10px', 
-                        marginTop: '2px',
-                        color: dayInfo.isPresent ? '#00ff00' : '#ff0000'
-                      }}>
-                        {dayInfo.isPresent ? 'Present' : 'Absent'}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+        {/* Month Statistics */}
+        <Row className="g-3 mb-4">
+          <Col md={3}>
+            <div style={{
+              background: 'rgba(13, 110, 253, 0.1)',
+              padding: '15px',
+              borderRadius: '10px'
+            }}>
+              <div className="text-white mb-1">Working Days</div>
+              <h3 className="mb-0 text-white">{monthStats.workingDays}</h3>
             </div>
+          </Col>
+          <Col md={3}>
+            <div style={{
+              background: 'rgba(25, 135, 84, 0.1)',
+              padding: '15px',
+              borderRadius: '10px'
+            }}>
+              <div className="text-white mb-1">Present Days</div>
+              <h3 className="mb-0 text-white">{monthStats.presentDays}</h3>
+            </div>
+          </Col>
+          <Col md={3}>
+            <div style={{
+              background: 'rgba(220, 53, 69, 0.1)',
+              padding: '15px',
+              borderRadius: '10px'
+            }}>
+              <div className="text-white mb-1">Absent Days</div>
+              <h3 className="mb-0 text-white">{monthStats.absentDays}</h3>
+            </div>
+          </Col>
+          <Col md={3}>
+            <div style={{
+              background: 'rgba(255, 193, 7, 0.1)',
+              padding: '15px',
+              borderRadius: '10px'
+            }}>
+              <div className="text-white mb-1">Holidays</div>
+              <h3 className="mb-0 text-white">{monthStats.holidays}</h3>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Calendar Grid */}
+        <div className="calendar-grid">
+          {/* Day Names */}
+          <Row className="text-center mb-3">
+            {DAYS_OF_WEEK.map((day, index) => (
+              <Col key={day} style={{ color: index === 0 ? '#dc3545' : '#00ff87' }}>
+                {day.slice(0, 3)}
+              </Col>
+            ))}
+          </Row>
+
+          {/* Calendar Days */}
+          {Array.from({ length: Math.ceil(calendarDays.length / 7) }).map((_, weekIndex) => (
+            <Row key={weekIndex} className="text-center mb-2">
+              {calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7).map((dayInfo, dayIndex) => (
+                <Col key={dayIndex}>
+                  {dayInfo.day && (
+                    <div
+                      style={{
+                        padding: '10px',
+                        background: dayInfo.isSunday 
+                          ? 'rgba(220, 53, 69, 0.1)' 
+                          : getStatusColor(dayInfo.attendance),
+                        borderRadius: '10px',
+                        border: dayInfo.isToday ? '1px solid #00ff87' : 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      className="calendar-day"
+                    >
+                      <div className="d-flex flex-column align-items-center">
+                        <span className={
+                          dayInfo.isSunday 
+                            ? 'text-danger' 
+                            : dayInfo.isToday 
+                              ? 'text-success' 
+                              : 'text-white'
+                        }>
+                          {dayInfo.day}
+                        </span>
+                        {dayInfo.attendance && !dayInfo.isSunday && (
+                          <div className="mt-1">
+                            {getStatusIcon(dayInfo.attendance)}
+                          </div>
+                        )}
+                        {dayInfo.isSunday && (
+                          <Badge bg="danger" className="mt-1">Holiday</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </Col>
+              ))}
+            </Row>
           ))}
         </div>
-      </div>
-    </div>
+      </Card.Body>
+    </Card>
   );
 };
 
-export default AttendanceCalendar; 
+export default AttendanceCalendar;
+

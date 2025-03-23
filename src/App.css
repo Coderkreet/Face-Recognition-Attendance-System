@@ -40,3 +40,299 @@
 .read-the-docs {
   color: #888;
 }
+
+.sidebar-link {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  color: white;
+  transition: all 0.3s ease;
+  width: 100%;
+  overflow: hidden; /* Prevent content overflow */
+  white-space: nowrap; /* Keep text in single line */
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateX(5px);
+  color: white;
+  /* Remove any margin or padding that might cause overflow */
+  margin-right: 0;
+}
+
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-left: 4px solid #00ff87 !important;
+  color: #00ff87;
+}
+
+/* Remove focus outline for better aesthetics */
+.sidebar-link:focus {
+  outline: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scrolling */
+}
+
+#root {
+  padding: 0; /* Remove default padding */
+  margin: 0;
+  height: 100vh;
+}
+
+/* Custom scrollbar for the main content */
+.dashboard-wrapper > div:last-child::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .dashboard-wrapper > div:first-child {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  .sidebar-toggle {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-toggle {
+    opacity: 0.5;
+  }
+  .sidebar-toggle:hover {
+    opacity: 1;
+  }
+}
+
+/* Update existing scrollbar styles */
+.dashboard-wrapper > div:last-child {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.dashboard-wrapper > div:last-child::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Active link styles */
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-left: 4px solid #00ff87 !important;
+}
+
+/* Hover effect for sidebar links */
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateX(5px);
+}
+
+/* Add these styles to your existing App.css */
+
+.calendar-day {
+  cursor: pointer;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-day:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-grid .col {
+  padding: 4px;
+}
+
+.badge {
+  font-weight: normal;
+  font-size: 0.7rem;
+}
+
+/* Hover effect for cards */
+.card {
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.attendance-stats .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.attendance-stats .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.table-dark {
+  --bs-table-bg: transparent;
+  --bs-table-color: #fff;
+}
+
+.table-dark thead th {
+  color: #8b8b8b;
+  font-weight: normal;
+  padding: 16px 12px;
+}
+
+.table-dark tbody td {
+  padding: 16px 12px;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom scrollbar for table */
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Form control styles */
+.form-control:focus {
+  background: transparent;
+  color: white;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-control::placeholder {
+  color: #8b8b8b;
+}
+
+/* Add these new styles for the sidebar container */
+.sidebar-container {
+  width: 250px;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Allow vertical scroll if needed */
+  padding-right: 5px; /* Add small padding to account for scrollbar */
+}
+
+/* Update the nav styles in sidebar */
+.sidebar-nav {
+  width: 100%;
+  padding: 0 10px;
+  margin: 0;
+  list-style: none;
+}
+
+.card-body small {
+  font-size: 0.75rem;
+}
+
+/* Hover effect for stat cards */
+.row .col-md-4 > div {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.row .col-md-4 > div:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Status indicators */
+.text-success {
+  color: #198754 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Add these styles to your existing App.css */
+
+.btn-group {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.btn-group .btn {
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-group .btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Custom tooltip styles */
+.chartjs-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+}

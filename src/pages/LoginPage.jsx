@@ -4,11 +4,11 @@ import Carousel from 'react-bootstrap/Carousel';
 import { FaCamera, FaEnvelope, FaLock } from 'react-icons/fa'; // Import icons from react-icons
 import './LoginPage.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import GradientBackground from './GradientBackground';
+import GradientBackground from '../components/GradientBackground';
 import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
-import Loinimg from './assete/—Pngtree—intelligent technology_5626635.png'
+import Loinimg from '../assete/—Pngtree—intelligent technology_5626635.png'
 import { Modal } from 'react-bootstrap';
 
 const Loginpage = () => {

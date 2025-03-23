@@ -5,8 +5,33 @@ import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 import * as faceapi from 'face-api.js';
 import { Table, Modal, Form, Button } from 'react-bootstrap';
-import { FaCamera } from 'react-icons/fa';
+import { FaCamera, FaUsers, FaClock, FaTimes, FaExclamationTriangle, FaWalking, FaCalendarAlt, FaSun, FaCog } from 'react-icons/fa';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import DashbordImg from '../assete/Dashbord Img.png'
+import DashboardLayout from '../components/layouts/DashboardLayout';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -396,15 +421,9 @@ const DashboardPage = () => {
     }
   };
 
- 
-
   return (
-    <div className="dashboard-container  py-1" style={{
-      background: 'linear-gradient(135deg, #1e1e2f 0%, #1e1e24 100%)',
-      color: 'white'
-    }}>
+    <div className="dashboard-container py-1">
       <div className="container p-1">
-        {/* Header Section */}
         <div className="card mb-4 border-0" style={{
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
@@ -465,18 +484,6 @@ const DashboardPage = () => {
                   </p>
                 </div>
               </div>
-              <Button 
-                onClick={handleLogout}
-                style={{
-                  background: 'linear-gradient(45deg, #ff6b6b, #ff4b2b)',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '10px 25px'
-                }}
-              >
-                <i className="fas fa-sign-out-alt me-2"></i>
-                Logout
-              </Button>
             </div>
           </div>
         </div>
@@ -522,13 +529,12 @@ const DashboardPage = () => {
                   </Button>
                 ):(
                   <img src={DashbordImg}  width={300} height={300} alt="" />
-
                 )}
               </div>
             </div>
           </div>
 
-          {/* Calendar Card */}
+          {/* Card */}
           <div className="col-md-8">
             <div className="card h-100 border-0" style={{
               background: 'rgba(255, 255, 255, 0.05)',
@@ -536,138 +542,275 @@ const DashboardPage = () => {
               borderRadius: '15px'
             }}>
               <div className="card-body p-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <Button 
-                    variant="link" 
-                    onClick={prevMonth}
-                    className="text-decoration-none"
-                    style={{ color: '#00ff87' }}
-                  >
-                    <i className="fas fa-chevron-left"></i>
-                  </Button>
-                  <h4 style={{ 
-                    color: '#00ff87',
-                    margin: 0,
-                    fontWeight: 'bold'
-                  }}>
-                    {currentDate.toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}
-                  </h4>
-                  <Button 
-                    variant="link" 
-                    onClick={nextMonth}
-                    className="text-decoration-none"
-                    style={{ color: '#00ff87' }}
-                  >
-                    <i className="fas fa-chevron-right"></i>
-                  </Button>
+                <div className="d-flex align-items-center mb-4">
+                  <div className="me-3">
+                    <div style={{
+                      width: '45px',
+                      height: '45px',
+                      borderRadius: '12px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <FaSun size={24} color="#ffd700" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-white mb-0">{new Date().toLocaleTimeString()}</h3>
+                    <small className="text-muted">Realtime Insight</small>
+                  </div>
                 </div>
 
-                {/* Calendar Grid - Keep existing calendar grid code but update styles */}
-                <div className="calendar-grid">
-                  <div className="row text-center mb-2">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                      <div key={index} className="col" style={{ color: '#ff3333' }}>
-                        {day}
+                <h5 className="text-white mb-3">Today:</h5>
+                <h4 className="text-white mb-4">{new Date().toLocaleDateString('en-US', { 
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}</h4>
+
+                <div className="row g-3">
+                  {/* Total Employees Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(13, 110, 253, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">Total Employees</h6>
+                        <FaUsers size={20} color="#0d6efd" />
                       </div>
-                    ))}
-                  </div>
-                  
-                  {calendarDays.length > 0 && Array(6).fill().map((_, rowIndex) => (
-                    <div key={rowIndex} className="row mb-2">
-                      {Array(7).fill().map((_, colIndex) => {
-                        const dayIndex = rowIndex * 7 + colIndex;
-                        const dayInfo = calendarDays[dayIndex] || { day: null, isCurrentMonth: false, isToday: false, isPresent: false };
-                        
-                        return (
-                          <div 
-                            key={colIndex} 
-                            className="col text-center" 
-                            style={{
-                              padding: '8px 0',
-                              borderRadius: '100%',
-                              background: dayInfo.isToday 
-                                ? 'rgba(255, 255, 0, 0.2)' 
-                                : dayInfo.isPresent 
-                                  ? 'rgba(0, 255, 0, 0.2)'
-                                  : dayInfo.isAbsent
-                                    ? 'rgba(255, 0, 0, 0.2)'
-                                    : 'transparent',
-                              color: !dayInfo.isCurrentMonth 
-                                ? '#666666' 
-                                : dayInfo.isPresent 
-                                  ? '#00ff00'
-                                  : dayInfo.isAbsent
-                                    ? '#ff0000'
-                                    : '#ffffff',
-                              fontWeight: dayInfo.isToday ? 'bold' : 'normal',
-                              border: dayInfo.isToday ? '1px solid yellow' : 'none'
-                            }}
-                          >
-                            {dayInfo.day}
-                            {(dayInfo.isPresent || dayInfo.isAbsent) && (
-                              <div style={{ 
-                                fontSize: '10px', 
-                                marginTop: '2px',
-                                color: dayInfo.isPresent ? '#00ff00' : '#ff0000'
-                              }}>
-                                {dayInfo.isPresent ? 'Present' : 'Absent'}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                      <h3 className="text-white mb-1">452</h3>
+                      <small className="text-success">
+                        <span>+2 new employees added!</span>
+                      </small>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* On Time Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(25, 135, 84, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">On Time</h6>
+                        <FaClock size={20} color="#198754" />
+                      </div>
+                      <h3 className="text-white mb-1">360</h3>
+                      <small className="text-danger">
+                        <span>-10% Less than yesterday</span>
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Absent Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(220, 53, 69, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">Absent</h6>
+                        <FaTimes size={20} color="#dc3545" />
+                      </div>
+                      <h3 className="text-white mb-1">30</h3>
+                      <small className="text-danger">
+                        <span>+3% Increase than yesterday</span>
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Late Arrival Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(255, 193, 7, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">Late Arrival</h6>
+                        <FaExclamationTriangle size={20} color="#ffc107" />
+                      </div>
+                      <h3 className="text-white mb-1">62</h3>
+                      <small className="text-danger">
+                        <span>+3% Increase than yesterday</span>
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Early Departures Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(13, 202, 240, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">Early Departures</h6>
+                        <FaWalking size={20} color="#0dcaf0" />
+                      </div>
+                      <h3 className="text-white mb-1">6</h3>
+                      <small className="text-success">
+                        <span>-10% Less than yesterday</span>
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Time-off Card */}
+                  <div className="col-md-4">
+                    <div style={{
+                      background: 'rgba(108, 117, 125, 0.1)',
+                      borderRadius: '12px',
+                      padding: '15px'
+                    }}>
+                      <div className="d-flex justify-content-between mb-2">
+                        <h6 className="text-white mb-0">Time-off</h6>
+                        <FaCalendarAlt size={20} color="#6c757d" />
+                      </div>
+                      <h3 className="text-white mb-1">42</h3>
+                      <small className="text-warning">
+                        <span>2% Increase than yesterday</span>
+                      </small>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Attendance Records Card */}
+          {/* Chart */}
           <div className="col-12">
             <div className="card border-0" style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.05)', 
               backdropFilter: 'blur(10px)',
               borderRadius: '15px'
             }}>
               <div className="card-body p-4">
-                <h4 className="mb-4" style={{ color: '#00ff87' }}>
-                  Recent Attendance Records
-                </h4>
-                <div className="table-responsive">
-                <Table hover className="table-dark table-borderless">
-                    <thead>
-                      <tr style={{
-                        background: 'rgba(255, 255, 255, 0.05)'
-                      }}>
-                        <th>Date & Time</th>
-                        <th>Username</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendanceRecords.map(record => (
-                        <tr key={record.id}>
-                          <td>{record.timestamp}</td>
-                          <td>    <Link to={`/profile/${record.username}`}>    {record.username}</Link></td>
-                          <td>
-                            <span className="badge" style={{
-                              background: record.status === 'Present' 
-                                ? 'linear-gradient(45deg, #00ff87, #60efff)'
-                                : 'linear-gradient(45deg, #ff6b6b, #ff4b2b)',
-                              padding: '8px 12px',
-                              borderRadius: '8px'
-                            }}>
-                              {record.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 style={{color: '#00ff87'}} className="mb-0">Attendance Comparison Chart</h4>
+                  <div className="d-flex align-items-center gap-3">
+                    <div className="btn-group">
+                      <button 
+                        className="btn btn-sm active" 
+                        style={{
+                          background: '#00ff87',
+                          color: 'white',
+                          border: 'none'
+                        }}
+                      >
+                        Daily
+                      </button>
+                      <button 
+                        className="btn btn-sm" 
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: '#00ff87',
+                          border: 'none'
+                        }}
+                      >
+                        Weekly
+                      </button>
+                      <button 
+                        className="btn btn-sm" 
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: '#00ff87',
+                          border: 'none'
+                        }}
+                      >
+                        Monthly
+                      </button>
+                    </div>
+                    <button 
+                      className="btn btn-sm" 
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        color: '#00ff87',
+                        border: 'none',
+                        padding: '8px'
+                      }}
+                    >
+                      <FaCog />
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ height: '300px' }}>
+                  <Line
+                    data={{
+                      labels: [
+                        '01 Aug', '02 Aug', '03 Aug', '04 Aug', '07 Aug', 
+                        '08 Aug', '09 Aug', '10 Aug', '11 Aug', '14 Aug',
+                        '15 Aug', '16 Aug'
+                      ],
+                      datasets: [
+                        {
+                          label: 'Attendance Rate',
+                          data: [58, 70, 58, 72, 91, 54, 70, 40, 58, 70, 58, 63],
+                          borderColor: '#00ff87',
+                          backgroundColor: 'rgba(0, 255, 135, 0.1)',
+                          tension: 0.4,
+                          fill: true,
+                          pointBackgroundColor: '#00ff87',
+                          pointBorderColor: '#00ff87',
+                          pointHoverBackgroundColor: '#fff',
+                          pointHoverBorderColor: '#00ff87',
+                          pointRadius: 4,
+                          pointHoverRadius: 6,
+                        }
+                      ]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          max: 100,
+                          grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false,
+                          },
+                          ticks: {
+                            color: '#00ff87',
+                            callback: (value) => `${value}%`
+                          }
+                        },
+                        x: {
+                          grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false,
+                          },
+                          ticks: {
+                            color: '#00ff87'
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          display: false
+                        },
+                        tooltip: {
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          titleColor: '#00ff87',
+                          bodyColor: '#00ff87',
+                          padding: 12,
+                          displayColors: false,
+                          callbacks: {
+                            label: (context) => `Attendance: ${context.parsed.y}%`
+                          }
+                        }
+                      },
+                      interaction: {
+                        intersect: false,
+                        mode: 'index'
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </div>

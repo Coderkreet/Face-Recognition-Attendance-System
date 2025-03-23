@@ -1,11 +1,14 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import ForgetPasswordPage from './ForgotPs';
-import Loginpage from './LoginPage';
-import DashboardPage from './Dashboard/DashboardPage';
-import RegisterPage from './RegisterPage';
-import ProfilePage from './ProfilePage';
+import ForgetPasswordPage from './pages/ForgotPs';
+import Loginpage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
+import DashboardLayout from './components/layouts/DashboardLayout';
+import AttendanceCalendar from './components/AttendanceCalendar'
+import RecentAttendanceRecords from './components/RecentAttendanceRecords';
 
 // Add Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -16,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <DashboardLayout>{children}</DashboardLayout>;
 };
 
 function App() {
@@ -33,6 +36,16 @@ function App() {
         <Route path="/profile/:username" element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/calendar" element={
+          <ProtectedRoute>
+            <AttendanceCalendar />
+          </ProtectedRoute>
+        } />
+        <Route path="/records" element={
+          <ProtectedRoute>
+            <RecentAttendanceRecords />
           </ProtectedRoute>
         } />
         <Route path="/forgot-password" element={<ForgetPasswordPage />} />

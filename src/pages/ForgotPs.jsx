@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEnvelope } from 'react-icons/fa'; // Import the envelope icon
-import GradientBackground from './GradientBackground';
+import GradientBackground from '../components/GradientBackground';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 const ForgetPasswordPage = () => {

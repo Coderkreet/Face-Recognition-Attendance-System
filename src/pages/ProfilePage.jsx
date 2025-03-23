@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
-import RecentAttendanceRecords from './components/RecentAttendanceRecords';
+import RecentAttendanceRecords from '../components/RecentAttendanceRecords';
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -143,7 +143,7 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <RecentAttendanceRecords />
+        {/* <RecentAttendanceRecords /> */}
       </div>
     </div>
   );
