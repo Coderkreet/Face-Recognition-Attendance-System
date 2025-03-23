@@ -27,7 +27,7 @@ const AttendanceCalendar = () => {
   useEffect(() => {
     generateCalendarDays(currentDate);
   }, [currentDate]);
-
+    
   const generateCalendarDays = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -77,7 +77,7 @@ const AttendanceCalendar = () => {
         }
       }
       if (isSunday) holidays++;
-
+      
       days.push({
         day,
         isCurrentMonth: true,
@@ -87,7 +87,7 @@ const AttendanceCalendar = () => {
         timestamp: dayRecord?.timestamp || null
       });
     }
-
+    
     setCalendarDays(days);
     setMonthStats({
       workingDays,
@@ -359,7 +359,7 @@ const AttendanceCalendar = () => {
         <div className="month-navigation">
           <div className="year-month">
             {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </div>
+              </div>
           <div className="d-flex gap-2">
             <button className="nav-btn" onClick={() => {
               const newDate = new Date(currentDate);
@@ -379,8 +379,8 @@ const AttendanceCalendar = () => {
               <FaChevronRight />
             </button>
           </div>
-        </div>
-
+          </div>
+          
         <div className="calendar-grid-container">
           <Row className="mb-2">
             {DAYS_OF_WEEK.map((day, index) => (
@@ -400,8 +400,8 @@ const AttendanceCalendar = () => {
                         ${dayInfo.isToday ? 'today' : ''} 
                         ${dayInfo.day === currentDate.getDate() ? 'active' : ''}
                         ${dayInfo.isSunday ? 'sunday' : ''}`}
-                    >
-                      {dayInfo.day}
+                  >
+                    {dayInfo.day}
                       {!dayInfo.isSunday && (
                         <div 
                           className={`event-indicator ${
@@ -426,8 +426,8 @@ const AttendanceCalendar = () => {
                           }}
                         />
                       )}
-                    </div>
-                  )}
+                      </div>
+                    )}
                 </Col>
               ))}
             </Row>
@@ -457,5 +457,5 @@ const AttendanceCalendar = () => {
   );
 };
 
-export default AttendanceCalendar;
+export default AttendanceCalendar; 
 

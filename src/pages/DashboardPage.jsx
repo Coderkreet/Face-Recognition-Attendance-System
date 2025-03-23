@@ -167,24 +167,6 @@ const DashboardPage = () => {
     setCalendarDays(days);
   }, [user, attendanceRecords]);
 
-  // Add these two functions for month navigation
-  const prevMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCurrentDate(newDate);
-  };
-  
-  const nextMonth = () => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCurrentDate(newDate);
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('user');
-    navigate('/login');
-  };
-
   const showPopupNotification = (message, type = 'success') => {
     setNotificationMessage(message);
     setNotificationType(type);
@@ -210,8 +192,14 @@ const DashboardPage = () => {
         return;
       }
 
-      const userData = JSON.parse(sessionStorage.getItem('user'));
-      if (!userData?.faceData || !userData?.faceImage) {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData || !Array.isArray(userData)) {
+        showPopupNotification('No user data found. Please log in again.', 'error');
+        return;
+      }
+
+      const currentUserData = userData.find(u => u.username === user?.username);
+      if (!currentUserData?.faceData || !currentUserData?.faceImage) {
         showPopupNotification('No registered face data found. Please log in with face recognition first.', 'error');
         return;
       }
@@ -234,7 +222,12 @@ const DashboardPage = () => {
 
       // Compare faces
       const currentFaceData = normalizeEmbedding(detection[0]);
-      const matchScore = await compareFaces(currentImageSrc, userData.faceImage, currentFaceData, userData.faceData);
+      const matchScore = await compareFaces(
+        currentImageSrc, 
+        currentUserData.faceImage, 
+        currentFaceData, 
+        currentUserData.faceData
+      );
       console.log('Face match score:', matchScore);
 
       // Check for duplicate attendance

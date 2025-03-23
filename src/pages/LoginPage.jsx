@@ -137,12 +137,15 @@ const Loginpage = () => {
   // Update the compareFaceEmbeddings function
   const compareFaceEmbeddings = (currentFaceData, storedFaceData) => {
     if (!currentFaceData || !storedFaceData) return 0;
+    console.log("currentFaceData", currentFaceData);
+    console.log("storedFaceData", storedFaceData);
     
     try {
       // Get the probabilities
       const currentProb = currentFaceData.probability;
       const storedProb = storedFaceData.probability;
       const probDiff = Math.abs(currentProb - storedProb);
+      console.log("probDiff", probDiff);
 
       console.log('Probability comparison:', {
         current: currentProb.toFixed(3),
@@ -152,6 +155,8 @@ const Loginpage = () => {
 
       // If difference is very small (0.01 or less)
       if (probDiff <= 0.01) {
+        // For probabilities like 0.98 and 0.97
+        // Return a high confidence score (0.95+)
         return 0.95 + (0.01 - probDiff); // Will give 0.94-0.95 range for 0.01 diff
       }
 
@@ -169,7 +174,7 @@ const Loginpage = () => {
     }
   };
 
-  // Add the compareFaces function
+  // Update the compareFaces function
   const compareFaces = async (currentImage, storedImage, currentFaceData, storedFaceData) => {
     try {
       // Compare facial features and landmarks
@@ -219,7 +224,15 @@ const Loginpage = () => {
       const imageScore = pixelMatchCount / (imageData1.length / 4);
 
       // Combine scores (50% feature weight, 50% image weight)
-      return (featureScore * 0.5) + (imageScore * 0.5);
+      const finalScore = (featureScore * 0.5) + (imageScore * 0.5);
+      
+      console.log('Face comparison scores:', {
+        featureScore: featureScore.toFixed(3),
+        imageScore: imageScore.toFixed(3),
+        finalScore: finalScore.toFixed(3)
+      });
+
+      return finalScore;
     } catch (error) {
       console.error('Error comparing faces:', error);
       return 0;
@@ -283,7 +296,6 @@ const Loginpage = () => {
           return;
         }
 
-        // Find the user with matching username
         const userData = storedUsersData.find(user => user.username === formData.username);
         if (!userData) {
           showAlert('Username not found. Please check your username.');
@@ -297,7 +309,6 @@ const Loginpage = () => {
           const currentFaceData = normalizeEmbedding(prediction);
           const currentImage = webcamRef.current.getScreenshot();
           
-          // Compare faces using the new method
           const matchScore = await compareFaces(
             currentImage,
             userData.faceImage,
@@ -305,8 +316,9 @@ const Loginpage = () => {
             userData.faceData
           );
 
-          console.log('Face match score:', matchScore);
+          console.log('Login face match score:', matchScore);
 
+          // Adjust threshold based on your requirements
           if (matchScore > 0.35) {
             sessionStorage.setItem('user', JSON.stringify({
               username: formData.username,
@@ -316,7 +328,7 @@ const Loginpage = () => {
             }));
             navigate('/dashboard');
           } else {
-            showAlert('Face verification failed. Please try again.');
+            showAlert(`Face verification failed. Confidence score: ${(matchScore * 100).toFixed(1)}%`);
           }
         } else {
           showAlert('Could not process face. Please try again.');

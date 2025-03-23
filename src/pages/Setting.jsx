@@ -1,8 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaEnvelope, FaPhone, FaBriefcase, FaCamera, FaCheck, FaTimes } from 'react-icons/fa';
-import Webcam from 'react-webcam';
-import * as tf from '@tensorflow/tfjs';
-import * as blazeface from '@tensorflow-models/blazeface';
 
 const Setting = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -17,16 +14,6 @@ const Setting = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  const [showWebcam, setShowWebcam] = useState(false);
-  const [faceDetected, setFaceDetected] = useState(false);
-  const [model, setModel] = useState(null);
-  const webcamRef = useRef(null);
-
-  const videoConstraints = {
-    width: 720,
-    height: 400,
-    facingMode: "user"
-  };
 
   useEffect(() => {
     // Get current user's data
@@ -48,35 +35,6 @@ const Setting = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await tf.ready();
-        const blazeModel = await blazeface.load();
-        setModel(blazeModel);
-        console.log('BlazeFace model loaded successfully');
-      } catch (error) {
-        console.error('Error loading BlazeFace model:', error);
-      }
-    };
-    loadModel();
-  }, []);
-
-  useEffect(() => {
-    let interval;
-    if (showWebcam && model) {
-      interval = setInterval(async () => {
-        try {
-          const isDetected = await checkForFace();
-          setFaceDetected(isDetected);
-        } catch (error) {
-          console.error('Face detection error:', error);
-        }
-      }, 500);
-    }
-    return () => clearInterval(interval);
-  }, [showWebcam, model]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -96,84 +54,6 @@ const Setting = () => {
         }));
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const checkForFace = async () => {
-    if (webcamRef.current?.video?.readyState === 4 && model) {
-      const predictions = await model.estimateFaces(webcamRef.current.video, false);
-      return predictions.length > 0;
-    }
-    return false;
-  };
-
-  const normalizeEmbedding = (prediction) => {
-    const { topLeft, bottomRight, landmarks, probability } = prediction;
-    
-    const boxWidth = bottomRight[0] - topLeft[0];
-    const boxHeight = bottomRight[1] - topLeft[1];
-    const aspectRatio = boxWidth / boxHeight;
-    
-    const features = {};
-    if (landmarks.length >= 6) {
-      const leftEye = landmarks[1];
-      const rightEye = landmarks[0];
-      features.eyeDistance = Math.sqrt(
-        Math.pow(rightEye[0] - leftEye[0], 2) + 
-        Math.pow(rightEye[1] - leftEye[1], 2)
-      ) / boxWidth;
-
-      const nose = landmarks[2];
-      const mouth = landmarks[3];
-      features.noseToMouth = Math.sqrt(
-        Math.pow(mouth[0] - nose[0], 2) + 
-        Math.pow(mouth[1] - nose[1], 2)
-      ) / boxHeight;
-    }
-
-    return {
-      aspectRatio,
-      features,
-      landmarks: landmarks.map(point => [
-        (point[0] - topLeft[0]) / boxWidth,
-        (point[1] - topLeft[1]) / boxHeight
-      ]),
-      probability
-    };
-  };
-
-  const handleFaceCapture = async () => {
-    if (!showWebcam) {
-      setShowWebcam(true);
-      return;
-    }
-
-    try {
-      const hasFace = await checkForFace();
-      if (!hasFace) {
-        alert('No face detected. Please position your face in front of the camera.');
-        return;
-      }
-
-      const imageSrc = webcamRef.current.getScreenshot();
-      const predictions = await model.estimateFaces(webcamRef.current.video, false);
-      
-      if (predictions.length > 0) {
-        const prediction = predictions[0];
-        const faceData = normalizeEmbedding(prediction);
-        
-        setFormData(prev => ({
-          ...prev,
-          faceData: faceData,
-          faceImage: imageSrc
-        }));
-        
-        setShowWebcam(false);
-        setMessage({ text: 'Face data updated successfully!', type: 'success' });
-      }
-    } catch (error) {
-      console.error('Error capturing face:', error);
-      setMessage({ text: 'Failed to capture face. Please try again.', type: 'error' });
     }
   };
 
@@ -283,72 +163,6 @@ const Setting = () => {
                     </label>
                   )}
                 </div>
-              </div>
-
-              <div className="text-center mb-4">
-                <div className="position-relative d-inline-block">
-                  {showWebcam && (
-                    <div className="webcam-container position-fixed top-50 start-50 translate-middle" 
-                         style={{ 
-                           zIndex: 1000,
-                           width: '100%',
-                           maxWidth: '720px',
-                           backgroundColor: '#1e1e2f',
-                           padding: '20px',
-                           borderRadius: '15px',
-                           boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-                         }}>
-                      <Webcam
-                        ref={webcamRef}
-                        audio={false}
-                        mirrored={true}
-                        screenshotFormat="image/jpeg"
-                        videoConstraints={videoConstraints}
-                        className="w-100"
-                        style={{ borderRadius: '10px' }}
-                      />
-                      <div className={`face-detection-status ${faceDetected ? 'detected' : 'not-detected'}`}
-                           style={{
-                             position: 'absolute',
-                             bottom: '60px',
-                             left: '50%',
-                             transform: 'translateX(-50%)',
-                             padding: '5px 10px',
-                             borderRadius: '5px',
-                             backgroundColor: faceDetected ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255, 0, 0, 0.7)',
-                             color: 'white'
-                           }}>
-                        {faceDetected ? 'Face Detected' : 'No Face Detected'}
-                      </div>
-                      <div className="mt-3 d-flex justify-content-center gap-2">
-                        <button 
-                          className="btn btn-success"
-                          onClick={handleFaceCapture}
-                          disabled={!faceDetected}
-                        >
-                          Capture Face
-                        </button>
-                        <button 
-                          className="btn btn-danger"
-                          onClick={() => setShowWebcam(false)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {isEditing && (
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-3"
-                    onClick={() => setShowWebcam(true)}
-                  >
-                    <FaCamera className="me-2" />
-                    Update Face Data
-                  </button>
-                )}
               </div>
 
               <div className="row g-4">
