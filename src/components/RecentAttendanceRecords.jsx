@@ -23,6 +23,7 @@ const RecentAttendanceRecords = () => {
                 <th>Date & Time</th>
                 <th>Username</th>
                 <th>Status</th>
+                {/* <th>Department</th> */}
               </tr>
             </thead>
             <tbody>
@@ -41,6 +42,7 @@ const RecentAttendanceRecords = () => {
                       {record.status}
                     </span>
                   </td>
+                  {/* <td>{record.department}</td> */}
                 </tr>
               ))}
             </tbody>

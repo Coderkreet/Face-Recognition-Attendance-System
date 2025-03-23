@@ -17,6 +17,7 @@ const Loginpage = () => {
     username: '',
     rememberMe: false,
     useWebcam: false,
+    password: '',
   });
   const [showWebcam, setShowWebcam] = useState(false);
   const webcamRef = useRef(null);
@@ -27,6 +28,7 @@ const Loginpage = () => {
   const [faceEmbedding, setFaceEmbedding] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [loginMethod, setLoginMethod] = useState('face');
 
   const videoConstraints = {
     width: 1400,
@@ -234,6 +236,31 @@ const Loginpage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     
+    if (loginMethod === 'password') {
+      try {
+        const storedUsersData = JSON.parse(localStorage.getItem('userData') || '[]');
+        const user = storedUsersData.find(u => 
+          u.username === formData.username && 
+          u.password === formData.password
+        );
+
+        if (user) {
+          sessionStorage.setItem('user', JSON.stringify({
+            username: formData.username,
+            isLoggedIn: true
+          }));
+          navigate('/dashboard');
+        } else {
+          showAlert('Invalid username or password');
+        }
+        return;
+      } catch (error) {
+        console.error('Login error:', error);
+        showAlert('Login failed. Please try again.');
+        return;
+      }
+    }
+
     if (formData.useWebcam) {
       if (!formData.username.trim()) {
         showAlert('Please enter a username before proceeding with face recognition.');
@@ -379,9 +406,46 @@ const Loginpage = () => {
                           />
                         </div>
                       </div>
+                      {
+                        loginMethod === 'password' && (
+                          <div className="form-group mb-3 position-relative">
+                          <label htmlFor="password" className="form-label text-light">Password</label>
+                          <div className="input-group">
+                            <span className="input-group-text">
+                              <FaLock />
+                            </span>
+                            <input
+                              type="password"
+                              className="form-control"
+                              id="password"
+                              name="password"
+                              value={formData.password}
+                              onChange={handleChange}
+                              required={loginMethod === 'password'}
+                              placeholder="Enter password"
+  
+                            />
+                          </div>
+                        </div>
+                      )
+                      }
+                   
+                      <div className="d-flex justify-content-end mb-3">
+                        <button
+                          type="button"
+                          className="btn btn-link text-light text-decoration-none"
+                          onClick={() => setLoginMethod(prev => prev === 'face' ? 'password' : 'face')}
+                        >
+                          Switch to {loginMethod === 'face' ? 'Password' : 'Face'} Login
+                        </button>
+                      </div>
                     </>
                   )}
-                  <div className="d-flex justify-content-center mb-3">
+                  
+
+                  {
+                    loginMethod === 'face' && (
+                      <div className="d-flex justify-content-center mb-3">
                     <button
                       type="button"
                       className={`btn w-100 face-recognition-btn ${formData.useWebcam ? 'active' : ''}`}
@@ -397,6 +461,9 @@ const Loginpage = () => {
                       {formData.useWebcam ? 'Disable Face Recognition' : 'Enable Face Recognition'}
                     </button>
                   </div>
+                    )
+                  }
+                  
                   {!showWebcam && (
                     <div className="form-check mb-3">
                       <input

@@ -132,6 +132,17 @@ const ProfilePage = () => {
                       fontSize: '1.25rem',
                       color: '#00ff87'
                     }}>Additional Information</h2>
+                    <p className="mb-2">
+                      <span className="text-light">Department:</span>{' '}
+                      <span className="text-white-50" style={{
+                        backgroundColor: 'rgba(0, 255, 135, 0.1)',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        display: 'inline-block'
+                      }}>
+                        {userProfile.department || 'Not Assigned'}
+                      </span>
+                    </p>
                     <p className="mb-0">
                       <span className="text-light">Aadhaar Number:</span>{' '}
                       <span className="text-white-50">{userProfile.aadhaarNumber}</span>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaUser, FaIdCard, FaPhone, FaCamera } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaIdCard, FaPhone, FaCamera, FaBriefcase } from 'react-icons/fa';
 import './LoginPage.css'; // We can reuse the login page styles
 import 'bootstrap/dist/css/bootstrap.min.css';
 import GradientBackground from '../components/GradientBackground';
@@ -26,7 +26,8 @@ const RegisterPage = () => {
     aadhaarNumber: '',
     faceData: null,
     faceImage: null,
-    profilePicture: null
+    profilePicture: null,
+    department: ''
   });
 
   const [isFaceCaptured, setIsFaceCaptured] = useState(false);
@@ -212,10 +213,12 @@ const RegisterPage = () => {
       fullName: formData.fullName,
       email: formData.email,
       phone: formData.phone,
+      password: formData.password, // Save password
       aadhaarNumber: formData.aadhaarNumber,
       faceData: formData.faceData,
       faceImage: formData.faceImage,
-      profilePicture: formData.profilePicture
+      profilePicture: formData.profilePicture,
+      department: formData.department
     });
 
     // Save updated array back to localStorage
@@ -370,6 +373,39 @@ const RegisterPage = () => {
                           required
                           placeholder="Enter your phone number"
                         />
+                      </div>
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="department" className="form-label text-light">Department</label>
+                      <div className="input-group">
+                        <span className="input-group-text">
+                          <FaBriefcase />
+                        </span>
+                        <select
+                          className="form-select"
+                          id="department"
+                          name="department"
+                          value={formData.department}
+                          onChange={handleChange}
+                          required
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            color: '#333'
+                          }}
+                        >
+                          <option value="">Select Department</option>
+                          <option value="Development">Development</option>
+                          <option value="HR">Human Resources</option>
+                          <option value="Management">Management</option>
+                          <option value="Support">Support</option>
+                          <option value="Sales">Sales</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="Finance">Finance</option>
+                          <option value="Operations">Operations</option>
+                          <option value="Quality Assurance">Quality Assurance</option>
+                          <option value="Research">Research & Development</option>
+                        </select>
                       </div>
                     </div>
 

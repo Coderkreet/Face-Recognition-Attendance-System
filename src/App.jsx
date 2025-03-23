@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import DashboardLayout from './components/layouts/DashboardLayout';
 import AttendanceCalendar from './components/AttendanceCalendar'
 import RecentAttendanceRecords from './components/RecentAttendanceRecords';
+import Setting from './pages/Setting';
 
 // Add Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +47,11 @@ function App() {
         <Route path="/records" element={
           <ProtectedRoute>
             <RecentAttendanceRecords />
+          </ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Setting />
           </ProtectedRoute>
         } />
         <Route path="/forgot-password" element={<ForgetPasswordPage />} />
