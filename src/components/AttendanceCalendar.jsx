@@ -7,7 +7,8 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaHome,
-  FaClock
+  FaClock,
+  FaPlus
 } from 'react-icons/fa';
 
 const AttendanceCalendar = () => {
@@ -39,6 +40,7 @@ const AttendanceCalendar = () => {
     let workingDays = 0;
     let presentDays = 0;
     let holidays = 0;
+    let absentDays = 0;
 
     // Get attendance records
     const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
@@ -59,14 +61,21 @@ const AttendanceCalendar = () => {
       
       const isSunday = dayOfWeek === 0;
       const isToday = currentDay.toDateString() === new Date().toDateString();
+      const isPastDay = currentDay < new Date().setHours(0, 0, 0, 0);
       
       // Check attendance for this day
       const dayRecord = records.find(record => 
         new Date(record.timestamp).toLocaleDateString() === dateString
       );
 
-      if (!isSunday) workingDays++;
-      if (dayRecord) presentDays++;
+      if (!isSunday) {
+        workingDays++;
+        if (dayRecord) {
+          presentDays++;
+        } else if (isPastDay) {
+          absentDays++;
+        }
+      }
       if (isSunday) holidays++;
 
       days.push({
@@ -74,7 +83,7 @@ const AttendanceCalendar = () => {
         isCurrentMonth: true,
         isSunday,
         isToday,
-        attendance: dayRecord?.status || null,
+        attendance: dayRecord?.status || (isPastDay && !isSunday ? 'absent' : null),
         timestamp: dayRecord?.timestamp || null
       });
     }
@@ -83,7 +92,7 @@ const AttendanceCalendar = () => {
     setMonthStats({
       workingDays,
       presentDays,
-      absentDays: workingDays - presentDays,
+      absentDays,
       holidays
     });
   };
@@ -123,157 +132,300 @@ const AttendanceCalendar = () => {
   };
 
   return (
-    <Card className="border-0" style={{
-      background: 'rgba(255, 255, 255, 0.05)',
-      backdropFilter: 'blur(10px)',
-      borderRadius: '15px'
-    }}>
-      <Card.Body className="p-4">
-        {/* Calendar Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div className="d-flex align-items-center">
-            <FaCalendarAlt style={{color: '#00ff87'}} className=" me-2" size={24} />
-            <h4 style={{color: '#00ff87'}} className="mb-0">
-              {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </h4>
+    <div className="calendar-wrapper">
+      <style>
+        {`
+          .calendar-wrapper {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: calc(100vh - 100px); /* Adjust based on your layout */
+            background: rgba(30, 30, 47, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .date-sidebar {
+            background: rgba(0, 255, 135, 0.1);
+            padding: 1.5rem;
+            color: #fff;
+            position: relative;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .current-date {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+
+          .current-day {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+          }
+
+          .calendar-main {
+            padding: 1.5rem;
+          }
+
+          .month-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+          }
+
+          .year-month {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #00ff87;
+          }
+
+          .calendar-grid-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 1rem;
+          }
+
+          .weekday-header {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+          }
+
+          .calendar-day {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 2px;
+          }
+
+          .calendar-day:hover {
+            background: rgba(0, 255, 135, 0.1);
+          }
+
+          .calendar-day.active {
+            background: rgba(0, 255, 135, 0.2);
+            color: #00ff87;
+            font-weight: 600;
+          }
+
+          .calendar-day.today {
+            border: 1px solid #00ff87;
+          }
+
+          .calendar-day.sunday {
+            color: #ff5e5e;
+          }
+
+          .create-event-btn {
+            position: absolute;
+            bottom: 3rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            padding: 0.8rem;
+            background: rgba(0, 255, 135, 0.1);
+            border: 1px solid rgba(0, 255, 135, 0.2);
+            border-radius: 8px;
+            color: #00ff87;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+          }
+
+          .create-event-btn:hover {
+            background: rgba(0, 255, 135, 0.2);
+          }
+
+          .event-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.2s ease;
+          }
+
+          .event-indicator.present {
+            background: #00ff87;
+            box-shadow: 0 0 5px rgba(0, 255, 135, 0.5);
+          }
+
+          .event-indicator.absent {
+            background: #dc3545;
+            box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+          }
+
+          .event-indicator.work-from-home {
+            background: #0d6efd;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+          }
+
+          .event-indicator.late {
+            background: #ffc107;
+            box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+          }
+
+          .nav-btn {
+            background: rgba(0, 255, 135, 0.1);
+            border: none;
+            color: #00ff87;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+          }
+
+          .nav-btn:hover {
+            background: rgba(0, 255, 135, 0.2);
+          }
+
+          .stats-mini {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 0.8rem;
+          }
+
+          .stats-mini-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+          }
+
+          .stats-mini-value {
+            color: #00ff87;
+            font-weight: 500;
+          }
+        `}
+      </style>
+
+      {/* Left Sidebar */}
+      <div className="date-sidebar">
+        <div className="current-date">{currentDate.getDate()}</div>
+        <div className="current-day">{DAYS_OF_WEEK[currentDate.getDay()]}</div>
+        
+        <div className="stats-mini">
+          <div className="stats-mini-item">
+            <span>Working Days</span>
+            <span className="stats-mini-value">{monthStats.workingDays}</span>
+          </div>
+          <div className="stats-mini-item">
+            <span>Present</span>
+            <span className="stats-mini-value">{monthStats.presentDays}</span>
+          </div>
+          <div className="stats-mini-item">
+            <span>Absent</span>
+            <span className="stats-mini-value">{monthStats.absentDays}</span>
+          </div>
+          <div className="stats-mini-item">
+            <span>Holidays</span>
+            <span className="stats-mini-value">{monthStats.holidays}</span>
+          </div>
+        </div>
+
+        <button className="create-event-btn">
+          <FaPlus /> Mark Attendance
+        </button>
+      </div>
+
+      {/* Main Calendar Area */}
+      <div className="calendar-main">
+        <div className="month-navigation">
+          <div className="year-month">
+            {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
           </div>
           <div className="d-flex gap-2">
-            <button
-              className="btn btn-sm"
-              onClick={() => {
-                const newDate = new Date(currentDate);
-                newDate.setMonth(newDate.getMonth() - 1);
-                setCurrentDate(newDate);
-              }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: 'none'
-              }}
-            >
+            <button className="nav-btn" onClick={() => {
+              const newDate = new Date(currentDate);
+              newDate.setMonth(newDate.getMonth() - 1);
+              setCurrentDate(newDate);
+            }}>
               <FaChevronLeft />
             </button>
-            <button
-              className="btn btn-sm"
-              onClick={() => setCurrentDate(new Date())}
-              style={{
-                background: 'rgba(13, 110, 253, 0.1)',
-                color: 'white',
-                border: 'none'
-              }}
-            >
+            <button className="nav-btn" onClick={() => setCurrentDate(new Date())}>
               Today
             </button>
-            <button
-              className="btn btn-sm"
-              onClick={() => {
-                const newDate = new Date(currentDate);
-                newDate.setMonth(newDate.getMonth() + 1);
-                setCurrentDate(newDate);
-              }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: 'none'
-              }}
-            >
+            <button className="nav-btn" onClick={() => {
+              const newDate = new Date(currentDate);
+              newDate.setMonth(newDate.getMonth() + 1);
+              setCurrentDate(newDate);
+            }}>
               <FaChevronRight />
             </button>
           </div>
         </div>
 
-        {/* Month Statistics */}
-        <Row className="g-3 mb-4">
-          <Col md={3}>
-            <div style={{
-              background: 'rgba(13, 110, 253, 0.1)',
-              padding: '15px',
-              borderRadius: '10px'
-            }}>
-              <div className="text-white mb-1">Working Days</div>
-              <h3 className="mb-0 text-white">{monthStats.workingDays}</h3>
-            </div>
-          </Col>
-          <Col md={3}>
-            <div style={{
-              background: 'rgba(25, 135, 84, 0.1)',
-              padding: '15px',
-              borderRadius: '10px'
-            }}>
-              <div className="text-white mb-1">Present Days</div>
-              <h3 className="mb-0 text-white">{monthStats.presentDays}</h3>
-            </div>
-          </Col>
-          <Col md={3}>
-            <div style={{
-              background: 'rgba(220, 53, 69, 0.1)',
-              padding: '15px',
-              borderRadius: '10px'
-            }}>
-              <div className="text-white mb-1">Absent Days</div>
-              <h3 className="mb-0 text-white">{monthStats.absentDays}</h3>
-            </div>
-          </Col>
-          <Col md={3}>
-            <div style={{
-              background: 'rgba(255, 193, 7, 0.1)',
-              padding: '15px',
-              borderRadius: '10px'
-            }}>
-              <div className="text-white mb-1">Holidays</div>
-              <h3 className="mb-0 text-white">{monthStats.holidays}</h3>
-            </div>
-          </Col>
-        </Row>
-
-        {/* Calendar Grid */}
-        <div className="calendar-grid">
-          {/* Day Names */}
-          <Row className="text-center mb-3">
+        <div className="calendar-grid-container">
+          <Row className="mb-2">
             {DAYS_OF_WEEK.map((day, index) => (
-              <Col key={day} style={{ color: index === 0 ? '#dc3545' : '#00ff87' }}>
+              <Col key={day} className="weekday-header">
                 {day.slice(0, 3)}
               </Col>
             ))}
           </Row>
 
-          {/* Calendar Days */}
           {Array.from({ length: Math.ceil(calendarDays.length / 7) }).map((_, weekIndex) => (
-            <Row key={weekIndex} className="text-center mb-2">
+            <Row key={weekIndex} className="g-0">
               {calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7).map((dayInfo, dayIndex) => (
                 <Col key={dayIndex}>
                   {dayInfo.day && (
                     <div
-                      style={{
-                        padding: '10px',
-                        background: dayInfo.isSunday 
-                          ? 'rgba(220, 53, 69, 0.1)' 
-                          : getStatusColor(dayInfo.attendance),
-                        borderRadius: '10px',
-                        border: dayInfo.isToday ? '1px solid #00ff87' : 'none',
-                        transition: 'all 0.3s ease'
-                      }}
-                      className="calendar-day"
+                      className={`calendar-day 
+                        ${dayInfo.isToday ? 'today' : ''} 
+                        ${dayInfo.day === currentDate.getDate() ? 'active' : ''}
+                        ${dayInfo.isSunday ? 'sunday' : ''}`}
                     >
-                      <div className="d-flex flex-column align-items-center">
-                        <span className={
-                          dayInfo.isSunday 
-                            ? 'text-danger' 
-                            : dayInfo.isToday 
-                              ? 'text-success' 
-                              : 'text-white'
-                        }>
-                          {dayInfo.day}
-                        </span>
-                        {dayInfo.attendance && !dayInfo.isSunday && (
-                          <div className="mt-1">
-                            {getStatusIcon(dayInfo.attendance)}
-                          </div>
-                        )}
-                        {dayInfo.isSunday && (
-                          <Badge bg="danger" className="mt-1">Holiday</Badge>
-                        )}
-                      </div>
+                      {dayInfo.day}
+                      {!dayInfo.isSunday && (
+                        <div 
+                          className={`event-indicator ${
+                            dayInfo.attendance?.toLowerCase().includes('present') 
+                              ? 'present'
+                              : dayInfo.attendance?.toLowerCase().includes('home')
+                                ? 'work-from-home'
+                                : dayInfo.attendance?.toLowerCase().includes('late')
+                                  ? 'late'
+                                  : dayInfo.attendance === 'absent' ? 'absent' : ''
+                          }`}
+                          style={{
+                            background: dayInfo.attendance?.toLowerCase().includes('present')
+                              ? '#00ff87'
+                              : dayInfo.attendance?.toLowerCase().includes('home')
+                                ? '#0d6efd'
+                                : dayInfo.attendance?.toLowerCase().includes('late')
+                                  ? '#ffc107'
+                                  : dayInfo.attendance === 'absent'
+                                    ? '#dc3545'
+                                    : 'transparent'
+                          }}
+                        />
+                      )}
                     </div>
                   )}
                 </Col>
@@ -281,8 +433,27 @@ const AttendanceCalendar = () => {
             </Row>
           ))}
         </div>
-      </Card.Body>
-    </Card>
+
+        <div className="mt-3 d-flex justify-content-center gap-4">
+          <div className="d-flex align-items-center">
+            <div className="event-indicator present me-2" style={{ position: 'static', transform: 'none' }}></div>
+            <small className="text-white-50">Present</small>
+          </div>
+          <div className="d-flex align-items-center">
+            <div className="event-indicator absent me-2" style={{ position: 'static', transform: 'none' }}></div>
+            <small className="text-white-50">Absent</small>
+          </div>
+          <div className="d-flex align-items-center">
+            <div className="event-indicator work-from-home me-2" style={{ position: 'static', transform: 'none' }}></div>
+            <small className="text-white-50">WFH</small>
+          </div>
+          <div className="d-flex align-items-center">
+            <div className="event-indicator late me-2" style={{ position: 'static', transform: 'none' }}></div>
+            <small className="text-white-50">Late</small>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
