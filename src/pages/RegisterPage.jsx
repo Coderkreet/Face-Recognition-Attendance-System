@@ -9,6 +9,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 
 import loginimg from '../assete/—Pngtree—intelligent technology_5626635.png';
+import { toast } from 'react-toastify';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -224,8 +225,8 @@ const RegisterPage = () => {
     // Save updated array back to localStorage
     localStorage.setItem('userData', JSON.stringify(userData));
 
-    alert("Registration successful!");
-    navigate('/dashboard');
+    toast.success("Registration successful!");
+    navigate('/login');
   };
 
   const handleAadhaarLogin = (event) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaEnvelope, FaPhone, FaBriefcase, FaCamera, FaCheck, FaTimes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const Setting = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -13,7 +14,6 @@ const Setting = () => {
     faceImage: null
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
     // Get current user's data
@@ -73,14 +73,12 @@ const Setting = () => {
       );
       
       localStorage.setItem('userData', JSON.stringify(updatedUsers));
-      setMessage({ text: 'Profile updated successfully!', type: 'success' });
+      toast.success('Profile updated successfully!');
       setIsEditing(false);
       setUserProfile(prev => ({ ...prev, ...formData }));
     } catch (error) {
-      setMessage({ text: 'Failed to update profile.', type: 'error' });
+      toast.error('Failed to update profile.');
     }
-
-    setTimeout(() => setMessage({ text: '', type: '' }), 3000);
   };
 
   if (!userProfile) {

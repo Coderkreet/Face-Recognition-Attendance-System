@@ -10,6 +10,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 import Loinimg from '../assete/—Pngtree—intelligent technology_5626635.png'
 import { Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 
 const Loginpage = () => {
   const navigate = useNavigate();
@@ -263,6 +264,7 @@ const Loginpage = () => {
             isLoggedIn: true
           }));
           navigate('/dashboard');
+          toast.success("Login successful!");
         } else {
           showAlert('Invalid username or password');
         }

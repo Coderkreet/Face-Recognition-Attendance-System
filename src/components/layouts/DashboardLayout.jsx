@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import { FaBars, FaCalendar, FaCog, FaFile, FaHome, FaTimes, FaUser } from 'react-icons/fa'; // Import icons
+import { toast } from 'react-toastify';
 
 const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const DashboardLayout = ({ children }) => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('user');
+    toast.success("Logout successful!");
     navigate('/login');
   };
 
