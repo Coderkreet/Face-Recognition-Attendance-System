@@ -113,11 +113,6 @@ const Setting = () => {
               </button>
             </div>
 
-            {message.text && (
-              <div className={`alert alert-${message.type === 'success' ? 'success' : 'danger'} mb-4`}>
-                {message.text}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit}>
               <div className="text-center mb-4">
