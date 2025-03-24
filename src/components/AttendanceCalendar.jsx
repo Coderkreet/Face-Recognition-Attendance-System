@@ -349,9 +349,6 @@ const AttendanceCalendar = () => {
           </div>
         </div>
 
-        <button className="create-event-btn">
-          <FaPlus /> Mark Attendance
-        </button>
       </div>
 
       {/* Main Calendar Area */}
