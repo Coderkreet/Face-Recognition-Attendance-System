@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Carousel from 'react-bootstrap/Carousel';
 import { FaCamera, FaEnvelope, FaLock } from 'react-icons/fa'; // Import icons from react-icons
 import './LoginPage.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -26,7 +25,6 @@ const Loginpage = () => {
   const [model, setModel] = useState(null);
   const formDataRef = useRef(formData);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [faceEmbedding, setFaceEmbedding] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loginMethod, setLoginMethod] = useState('face');

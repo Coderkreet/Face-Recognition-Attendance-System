@@ -2,21 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaUser, FaIdCard, FaPhone, FaCamera, FaBriefcase } from 'react-icons/fa';
 import './LoginPage.css'; // We can reuse the login page styles
-import 'bootstrap/dist/css/bootstrap.min.css';
 import GradientBackground from '../components/GradientBackground';
 import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
-
 import loginimg from '../assete/—Pngtree—intelligent technology_5626635.png';
 import { toast } from 'react-toastify';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [aadhaarLoginData, setAadhaarLoginData] = useState({
-    aadhaarNumber: '',
-    otp: ''
-  });
+
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -122,10 +117,6 @@ const RegisterPage = () => {
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
 
-  const handleAadhaarLoginChange = (event) => {
-    const { name, value } = event.target;
-    setAadhaarLoginData(prev => ({ ...prev, [name]: value }));
-  };
 
   const handleFaceCapture = async () => {
     if (!showWebcam) {
@@ -229,10 +220,6 @@ const RegisterPage = () => {
     navigate('/login');
   };
 
-  const handleAadhaarLogin = (event) => {
-    event.preventDefault();
-    console.log('Aadhaar login attempted:', aadhaarLoginData);
-  };
 
   return (
     <>
