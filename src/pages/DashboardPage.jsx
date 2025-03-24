@@ -551,7 +551,7 @@ const DashboardPage = () => {
                   </div>
                   <div>
                     <h3 className="text-white mb-0">{new Date().toLocaleTimeString()}</h3>
-                    <small className="text-muted">Realtime Insight</small>
+                    <small className="text-white">Realtime Insight</small>
                   </div>
                 </div>
 
