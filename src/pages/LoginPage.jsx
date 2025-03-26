@@ -319,7 +319,7 @@ const Loginpage = () => {
           console.log('Login face match score:', matchScore);
 
           // Adjust threshold based on your requirements
-          if (matchScore > 0.4) {
+          if (matchScore > 0.38) {
             sessionStorage.setItem('user', JSON.stringify({
               username: formData.username,
               isLoggedIn: true,
