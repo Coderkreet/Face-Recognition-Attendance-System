@@ -92,6 +92,7 @@ const RegisterPage = () => {
         Math.pow(rightEye[0] - leftEye[0], 2) + 
         Math.pow(rightEye[1] - leftEye[1], 2)
       ) / boxWidth;
+      
 
       const nose = landmarks[2];
       const mouth = landmarks[3];

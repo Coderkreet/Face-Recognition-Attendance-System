@@ -86,8 +86,7 @@ const DashboardPage = () => {
     const storedRecords = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
     setAttendanceRecords(storedRecords);
 
-    // Generate calendar days immediately
-    generateCalendarDays(new Date());
+
     
     // Update current time every second
     const timer = setInterval(() => {
@@ -101,71 +100,7 @@ const DashboardPage = () => {
     };
   }, [navigate, user]); // Minimal dependencies
 
-  useEffect(() => {
-    if (!user) return; // Guard clause
-    generateCalendarDays(currentDate);
-  }, [currentDate, user]); // Remove attendanceRecords from dependencies
 
-  const generateCalendarDays = useCallback((date) => {
-    if (!user) return;
-    
-    // Get current attendance records from state instead of parsing localStorage
-    const existingRecords = attendanceRecords;
-    
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    
-    // First day of the month
-    const firstDay = new Date(year, month, 1);
-    // Last day of the month
-    const lastDay = new Date(year, month + 1, 0);
-    
-    // Calculate days from previous month to fill first week
-    const daysFromPrevMonth = firstDay.getDay();
-    // Total days in current month
-    const daysInMonth = lastDay.getDate();
-    
-    const days = [];
-    const today = new Date();
-    
-    // Add empty slots for previous month days
-    for (let i = 0; i < daysFromPrevMonth; i++) {
-      days.push({ day: null, isCurrentMonth: false, isToday: false, isPresent: false });
-    }
-    
-    // Add current month days
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dayDate = new Date(year, month, i);
-      const dateString = dayDate.toLocaleDateString();
-      
-      // Check if attendance was marked on this day
-      const isPresent = existingRecords.some(record => 
-        new Date(record.timestamp).toLocaleDateString() === dateString && 
-        record.username === user.username
-      );
-
-      // Check if it's a past date
-      const isPastDate = dayDate < today && dayDate.toDateString() !== today.toDateString();
-      
-      days.push({
-        day: i,
-        isCurrentMonth: true,
-        isToday: dateString === today.toLocaleDateString(),
-        isPresent: isPresent,
-        isAbsent: isPastDate && !isPresent // Mark as absent if it's a past date without attendance
-      });
-    }
-    
-    // Fill remaining slots to complete the grid (6 rows x 7 columns)
-    const totalSlots = 42; // 6 weeks x 7 days
-    const remainingSlots = totalSlots - days.length;
-    
-    for (let i = 1; i <= remainingSlots; i++) {
-      days.push({ day: i, isCurrentMonth: false, isToday: false, isPresent: false });
-    }
-    
-    setCalendarDays(days);
-  }, [user, attendanceRecords]);
 
   const showPopupNotification = (message, type = 'success') => {
     setNotificationMessage(message);
@@ -244,7 +179,7 @@ const DashboardPage = () => {
       }
 
       // Verify face match and mark attendance (using 40% threshold)
-      if (matchScore > 0.3) {
+      if (matchScore > 0.4) {
         const newRecord = {
           id: Date.now(),
           username: user.username,
